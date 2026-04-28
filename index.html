@@ -283,24 +283,78 @@ document.getElementById('limit-up').addEventListener('click',function(e){e.stopP
 document.getElementById('gear-btn').addEventListener('click',function(e){e.stopPropagation();document.getElementById('settings-panel').classList.toggle('open');this.classList.toggle('spinning');});
 document.addEventListener('click',function(e){var p=document.getElementById('settings-panel'),g=document.getElementById('gear-btn');if(!p.contains(e.target)&&e.target!==g){p.classList.remove('open');g.classList.remove('spinning');}});
 
-// ==================== MUSIC (SIMPLES E CORRETO) ====================
-var playlist=[
+// ==================== MUSIC (DINÂMICA VIA GITHUB API) ====================
+// *** ATUALIZADO: Busca as músicas automaticamente do GitHub ***
+
+var GITHUB_USER = 'akiratank01-creator';
+var GITHUB_REPO = 'audio-assets';
+var GITHUB_FOLDER = 'SNEAKER';
+var GITHUB_API = 'https://api.github.com/repos/' + GITHUB_USER + '/' + GITHUB_REPO + '/contents/' + GITHUB_FOLDER;
+
+// Playlist de fallback caso a API falhe
+var FALLBACK_PLAYLIST = [
   'https://raw.githubusercontent.com/akiratank01-creator/audio-assets/main/SNEAKER/silva.mp3',
   'https://raw.githubusercontent.com/akiratank01-creator/audio-assets/main/SNEAKER/pacificadoresr.mp3',
   'https://raw.githubusercontent.com/akiratank01-creator/audio-assets/main/SNEAKER/solitario.mp3',
   'https://raw.githubusercontent.com/akiratank01-creator/audio-assets/main/SNEAKER/beethoven.mp3'
 ];
-var lastBgmIdx=-1;
-var bgm=new Audio();bgm.loop=true;bgm.volume=0.7;
 
-function pickSong(){
-  var idx;
-  if(playlist.length<=1){idx=0;}
-  else{do{idx=Math.floor(Math.random()*playlist.length);}while(idx===lastBgmIdx);}
-  lastBgmIdx=idx;
-  bgm.src=playlist[idx];
+var playlist = [];
+var playlistReady = false;
+var lastBgmIdx = -1;
+var bgm = new Audio();
+bgm.loop = true;
+bgm.volume = 0.7;
+
+// Busca a lista de músicas do GitHub em tempo real
+function fetchPlaylist() {
+  // Timestamp para evitar cache do navegador
+  var url = GITHUB_API + '?_=' + Date.now();
+  fetch(url)
+    .then(function(resp) {
+      if (!resp.ok) throw new Error('GitHub API status: ' + resp.status);
+      return resp.json();
+    })
+    .then(function(files) {
+      // Filtra apenas arquivos .mp3 e pega a URL raw
+      var mp3s = [];
+      for (var i = 0; i < files.length; i++) {
+        if (files[i].name.toLowerCase().endsWith('.mp3')) {
+          mp3s.push(files[i].download_url);
+        }
+      }
+      if (mp3s.length > 0) {
+        playlist = mp3s;
+        console.log('[MUSIC] ' + playlist.length + ' músicas encontradas no GitHub:');
+        for (var j = 0; j < playlist.length; j++) console.log('  ' + (j+1) + '. ' + playlist[j]);
+      } else {
+        playlist = FALLBACK_PLAYLIST;
+        console.log('[MUSIC] Nenhum .mp3 encontrado, usando fallback.');
+      }
+      playlistReady = true;
+      pickSong();
+    })
+    .catch(function(err) {
+      console.warn('[MUSIC] Erro ao buscar playlist do GitHub:', err.message);
+      playlist = FALLBACK_PLAYLIST;
+      playlistReady = true;
+      pickSong();
+    });
 }
-pickSong();
+
+function pickSong() {
+  if (playlist.length === 0) return;
+  var idx;
+  if (playlist.length <= 1) { idx = 0; }
+  else { do { idx = Math.floor(Math.random() * playlist.length); } while (idx === lastBgmIdx); }
+  lastBgmIdx = idx;
+  bgm.src = playlist[idx];
+}
+
+// Inicia a busca das músicas assim que a página carrega
+fetchPlaylist();
+
+// *** FIM DA ATUALIZAÇÃO ***
 
 var actx=null;
 function initAudio(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();}
@@ -392,7 +446,8 @@ function die(){
   document.getElementById('go-score').textContent=score;
   document.getElementById('go-best').textContent=best;
   document.getElementById('gameover-overlay').classList.add('open');
-  pickSong();
+  // *** ATUALIZADO: Ao morrer, busca músicas atualizadas e escolhe uma ***
+  fetchPlaylist();
 }
 
 document.getElementById('go-restart').addEventListener('click',function(){
