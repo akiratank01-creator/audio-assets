@@ -8,12 +8,14 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#050505;font-family:'Segoe UI',sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
 canvas#game{position:fixed;top:0;left:0;display:block;z-index:1;touch-action:none}
-#ui{position:fixed;top:12px;left:12px;color:#00ff88;font-size:15px;font-weight:bold;text-shadow:0 0 8px #00ff8880;z-index:30;pointer-events:none}
+#ui{position:fixed;top:12px;left:12px;color:#00ff88;font-size:15px;font-weight:bold;text-shadow:0 0 8px #00ff8880;z-index:30;pointer-events:none;opacity:0;transition:opacity .3s}
+#ui.visible{opacity:1}
 #ui .obst-counter{color:#ff6688;font-size:13px;text-shadow:0 0 8px #ff668880}
 #fullscreen-btn{position:fixed;top:12px;right:12px;z-index:300;background:rgba(255,255,255,0.1);border:1px solid #00ff88;color:#00ff88;padding:8px;border-radius:8px;cursor:pointer;font-size:12px}
-#gear-btn{position:fixed;bottom:220px;right:14px;z-index:300;background:rgba(255,255,255,0.08);border:1px solid #888;color:#ccc;width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:20px;display:flex;justify-content:center;align-items:center;transition:transform .3s,background .2s}
+#gear-btn{position:fixed;bottom:220px;right:14px;z-index:300;background:rgba(255,255,255,0.08);border:1px solid #888;color:#ccc;width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:20px;display:flex;justify-content:center;align-items:center;transition:transform .3s,background .2s,opacity .3s}
 #gear-btn:hover{background:rgba(255,255,255,0.18);color:#fff}
 #gear-btn.spinning{transform:rotate(180deg)}
+#gear-btn.hidden{opacity:0;pointer-events:none;visibility:hidden}
 #settings-panel{position:fixed;bottom:270px;right:14px;z-index:299;background:rgba(10,10,10,0.95);border:1px solid #444;border-radius:14px;padding:18px 20px;display:none;min-width:220px;backdrop-filter:blur(10px)}
 #settings-panel.open{display:block;animation:panelIn .25s ease}
 @keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -28,7 +30,8 @@ canvas#game{position:fixed;top:0;left:0;display:block;z-index:1;touch-action:non
 #settings-panel .limit-val{color:#ff6688;font-weight:bold;font-size:14px;min-width:30px;text-align:center}
 #settings-panel .limit-btn{width:30px;height:30px;border-radius:50%;border:1px solid #555;background:transparent;color:#ccc;cursor:pointer;font-size:16px;display:flex;justify-content:center;align-items:center;transition:all .15s}
 #settings-panel .limit-btn:hover{border-color:#ff6688;color:#ff6688}
-#controls{position:fixed;bottom:0;left:0;right:0;height:200px;display:flex;align-items:flex-end;padding:12px 16px;pointer-events:none;z-index:100}
+#controls{position:fixed;bottom:0;left:0;right:0;height:200px;display:flex;align-items:flex-end;padding:12px 16px;pointer-events:none;z-index:100;opacity:0;transition:opacity .3s}
+#controls.visible{opacity:1}
 .dpad{pointer-events:auto;display:none;grid-template-columns:repeat(3,80px);grid-template-rows:repeat(2,80px);gap:10px;touch-action:none}
 .tbtn{width:80px;height:80px;background:rgba(0,255,136,.10);border:2px solid rgba(0,255,136,.55);border-radius:50%;display:flex;justify-content:center;align-items:center;color:#00ff88;font-size:28px;font-weight:bold;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;cursor:pointer;transition:background .08s}
 .tbtn.pressed,.tbtn:active{background:rgba(0,255,136,.5);color:#000}
@@ -41,9 +44,10 @@ body.ctrl-right #controls{justify-content:flex-end!important}
 @media(orientation:portrait){#gear-btn{bottom:220px}#settings-panel{bottom:270px}}
 @media(orientation:landscape)and(max-width:1280px){#controls{height:190px}#gear-btn{bottom:210px}#settings-panel{bottom:260px}}
 @media(min-width:1281px){#controls{display:none!important}#gear-btn{bottom:20px}#settings-panel{bottom:70px}}
-#skins-btn{position:fixed;bottom:220px;left:14px;z-index:300;background:rgba(255,120,180,0.12);border:1px solid #ff69b4;color:#ff69b4;padding:8px 14px;border-radius:30px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;transition:background .2s,transform .1s}
+#skins-btn{position:fixed;bottom:220px;left:14px;z-index:300;background:rgba(255,120,180,0.12);border:1px solid #ff69b4;color:#ff69b4;padding:8px 14px;border-radius:30px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;transition:background .2s,transform .1s,opacity .3s}
 #skins-btn:hover{background:rgba(255,120,180,0.25)}
 #skins-btn:active{transform:scale(.95)}
+#skins-btn.hidden{opacity:0;pointer-events:none;visibility:hidden}
 #skins-btn .worm-icon{width:22px;height:22px;display:inline-block}
 #skins-panel{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,0.92);backdrop-filter:blur(8px);display:none;flex-direction:column;align-items:center;padding:24px;overflow-y:auto}
 #skins-panel.open{display:flex;animation:panelIn .25s ease}
@@ -66,8 +70,12 @@ body.ctrl-right #controls{justify-content:flex-end!important}
 #gameover-overlay .go-title{font-size:clamp(1.6em,5vw,2.8em);font-weight:900;color:#ff2244;text-shadow:0 0 30px #ff224488;margin-bottom:10px}
 #gameover-overlay .go-score{font-size:clamp(1.2em,4vw,2em);color:#fff;margin-bottom:6px}
 #gameover-overlay .go-best{font-size:1em;color:#ffaa00;margin-bottom:28px}
-#gameover-overlay .go-btn{padding:14px 48px;font-size:1.3em;cursor:pointer;background:#ff2244;color:#fff;border:none;border-radius:50px;font-weight:bold;box-shadow:0 0 30px #ff224466;transition:transform .1s;-webkit-tap-highlight-color:transparent}
+#gameover-overlay .go-btns{display:flex;flex-direction:column;gap:14px;align-items:center}
+#gameover-overlay .go-btn{padding:14px 48px;font-size:1.3em;cursor:pointer;background:#ff2244;color:#fff;border:none;border-radius:50px;font-weight:bold;box-shadow:0 0 30px #ff224466;transition:transform .1s;-webkit-tap-highlight-color:transparent;min-width:240px}
 #gameover-overlay .go-btn:active{transform:scale(.95)}
+#gameover-overlay .go-btn-menu{padding:12px 40px;font-size:1.1em;cursor:pointer;background:transparent;color:#ffaa00;border:2px solid #ffaa00;border-radius:50px;font-weight:bold;box-shadow:0 0 20px #ffaa0033;transition:transform .1s,background .2s;-webkit-tap-highlight-color:transparent;min-width:240px}
+#gameover-overlay .go-btn-menu:hover{background:rgba(255,170,0,0.1)}
+#gameover-overlay .go-btn-menu:active{transform:scale(.95)}
 #overlay{position:fixed;inset:0;background:radial-gradient(ellipse at center,#111 0%,#000 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:200;color:#fff;text-align:center;padding:24px}
 #menu-bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .overlay-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
@@ -99,7 +107,7 @@ body.ctrl-right #controls{justify-content:flex-end!important}
 </div>
 <button id="fullscreen-btn">⛶ TELA CHEIA</button>
 
-<button id="gear-btn">⚙</button>
+<button id="gear-btn" class="hidden">⚙</button>
 <div id="settings-panel">
   <h3>⚙ CONFIGURAÇÕES</h3>
   <div class="toggle-row">
@@ -115,7 +123,7 @@ body.ctrl-right #controls{justify-content:flex-end!important}
   </div>
 </div>
 
-<button id="skins-btn">
+<button id="skins-btn" class="hidden">
   <svg class="worm-icon" viewBox="0 0 24 24" fill="none">
     <path d="M4 18c0-2 1-4 3-5s4-3 5-5 2-4 4-4 3 1 3 3-1 3-3 4-4 3-5 5-2 4-3 5-4 2-4 0z" fill="#ff69b4" opacity="0.85"/>
     <circle cx="19" cy="6" r="1.2" fill="#fff"/><circle cx="19.4" cy="6" r="0.6" fill="#222"/>
@@ -134,7 +142,10 @@ body.ctrl-right #controls{justify-content:flex-end!important}
   <div class="go-title">💀 GAME OVER!</div>
   <div class="go-score">Pontos: <span id="go-score">0</span></div>
   <div class="go-best">👑 Recorde: <span id="go-best">0</span></div>
-  <button class="go-btn" id="go-restart">▶ JOGAR DE NOVO</button>
+  <div class="go-btns">
+    <button class="go-btn" id="go-restart">▶ JOGAR DE NOVO</button>
+    <button class="go-btn-menu" id="go-menu">🏠 MENU PRINCIPAL</button>
+  </div>
 </div>
 
 <div id="overlay">
@@ -211,10 +222,34 @@ document.getElementById('skins-btn').addEventListener('click',function(e){e.stop
 document.getElementById('close-skins').addEventListener('click',function(){document.getElementById('skins-panel').classList.remove('open');});
 function getSkinData(){for(var i=0;i<SKINS.length;i++){if(SKINS[i].id===currentSkin)return SKINS[i];}return SKINS[0];}
 
+// ==================== UI VISIBILITY CONTROL ====================
+function showMenuUI(){
+  document.getElementById('skins-btn').classList.remove('hidden');
+  document.getElementById('gear-btn').classList.remove('hidden');
+  document.getElementById('settings-panel').classList.remove('open');
+  document.getElementById('gear-btn').classList.remove('spinning');
+}
+function hideMenuUI(){
+  document.getElementById('skins-btn').classList.add('hidden');
+  document.getElementById('gear-btn').classList.add('hidden');
+  document.getElementById('settings-panel').classList.remove('open');
+  document.getElementById('gear-btn').classList.remove('spinning');
+  document.getElementById('skins-panel').classList.remove('open');
+}
+function showGameUI(){
+  document.getElementById('ui').classList.add('visible');
+  document.getElementById('controls').classList.add('visible');
+}
+function hideGameUI(){
+  document.getElementById('ui').classList.remove('visible');
+  document.getElementById('controls').classList.remove('visible');
+}
+
 // ==================== MENU SNAKES ====================
 var menuCanvas=document.getElementById('menu-bg');
 var menuCtx=menuCanvas.getContext('2d');
 var menuSnakes=[];
+var menuAnimFrame=null;
 function resizeMenuCanvas(){menuCanvas.width=window.innerWidth;menuCanvas.height=window.innerHeight;}
 function initMenuSnakes(){
   resizeMenuCanvas();var W=menuCanvas.width,H=menuCanvas.height;menuSnakes=[];
@@ -233,8 +268,8 @@ function initMenuSnakes(){
 }
 function animateMenu(ts){
   var ov=document.getElementById('overlay');
-  if(!ov||ov.style.display==='none')return;
-  requestAnimationFrame(animateMenu);
+  if(!ov||ov.style.display==='none'){menuAnimFrame=null;return;}
+  menuAnimFrame=requestAnimationFrame(animateMenu);
   var W=menuCanvas.width,H=menuCanvas.height;menuCtx.clearRect(0,0,W,H);
   for(var si=0;si<menuSnakes.length;si++){
     var sn=menuSnakes[si];sn.turnTimer--;
@@ -284,77 +319,50 @@ document.getElementById('gear-btn').addEventListener('click',function(e){e.stopP
 document.addEventListener('click',function(e){var p=document.getElementById('settings-panel'),g=document.getElementById('gear-btn');if(!p.contains(e.target)&&e.target!==g){p.classList.remove('open');g.classList.remove('spinning');}});
 
 // ==================== MUSIC (DINÂMICA VIA GITHUB API) ====================
-// *** ATUALIZADO: Busca as músicas automaticamente do GitHub ***
+var GITHUB_USER='akiratank01-creator';
+var GITHUB_REPO='audio-assets';
+var GITHUB_FOLDER='SNEAKER';
+var GITHUB_API='https://api.github.com/repos/'+GITHUB_USER+'/'+GITHUB_REPO+'/contents/'+GITHUB_FOLDER;
 
-var GITHUB_USER = 'akiratank01-creator';
-var GITHUB_REPO = 'audio-assets';
-var GITHUB_FOLDER = 'SNEAKER';
-var GITHUB_API = 'https://api.github.com/repos/' + GITHUB_USER + '/' + GITHUB_REPO + '/contents/' + GITHUB_FOLDER;
-
-// Playlist de fallback caso a API falhe
-var FALLBACK_PLAYLIST = [
+var FALLBACK_PLAYLIST=[
   'https://raw.githubusercontent.com/akiratank01-creator/audio-assets/main/SNEAKER/silva.mp3',
   'https://raw.githubusercontent.com/akiratank01-creator/audio-assets/main/SNEAKER/pacificadoresr.mp3',
   'https://raw.githubusercontent.com/akiratank01-creator/audio-assets/main/SNEAKER/solitario.mp3',
   'https://raw.githubusercontent.com/akiratank01-creator/audio-assets/main/SNEAKER/beethoven.mp3'
 ];
 
-var playlist = [];
-var playlistReady = false;
-var lastBgmIdx = -1;
-var bgm = new Audio();
-bgm.loop = true;
-bgm.volume = 0.7;
+var playlist=[];
+var playlistReady=false;
+var lastBgmIdx=-1;
+var bgm=new Audio();bgm.loop=true;bgm.volume=0.7;
 
-// Busca a lista de músicas do GitHub em tempo real
-function fetchPlaylist() {
-  // Timestamp para evitar cache do navegador
-  var url = GITHUB_API + '?_=' + Date.now();
-  fetch(url)
-    .then(function(resp) {
-      if (!resp.ok) throw new Error('GitHub API status: ' + resp.status);
-      return resp.json();
-    })
-    .then(function(files) {
-      // Filtra apenas arquivos .mp3 e pega a URL raw
-      var mp3s = [];
-      for (var i = 0; i < files.length; i++) {
-        if (files[i].name.toLowerCase().endsWith('.mp3')) {
-          mp3s.push(files[i].download_url);
-        }
-      }
-      if (mp3s.length > 0) {
-        playlist = mp3s;
-        console.log('[MUSIC] ' + playlist.length + ' músicas encontradas no GitHub:');
-        for (var j = 0; j < playlist.length; j++) console.log('  ' + (j+1) + '. ' + playlist[j]);
-      } else {
-        playlist = FALLBACK_PLAYLIST;
-        console.log('[MUSIC] Nenhum .mp3 encontrado, usando fallback.');
-      }
-      playlistReady = true;
-      pickSong();
-    })
-    .catch(function(err) {
-      console.warn('[MUSIC] Erro ao buscar playlist do GitHub:', err.message);
-      playlist = FALLBACK_PLAYLIST;
-      playlistReady = true;
-      pickSong();
-    });
+function fetchPlaylist(){
+  var url=GITHUB_API+'?_='+Date.now();
+  fetch(url).then(function(resp){
+    if(!resp.ok)throw new Error('GitHub API status: '+resp.status);
+    return resp.json();
+  }).then(function(files){
+    var mp3s=[];
+    for(var i=0;i<files.length;i++){
+      if(files[i].name.toLowerCase().endsWith('.mp3'))mp3s.push(files[i].download_url);
+    }
+    if(mp3s.length>0){playlist=mp3s;console.log('[MUSIC] '+playlist.length+' músicas encontradas:');for(var j=0;j<playlist.length;j++)console.log('  '+(j+1)+'. '+playlist[j]);}
+    else{playlist=FALLBACK_PLAYLIST;console.log('[MUSIC] Nenhum .mp3 encontrado, usando fallback.');}
+    playlistReady=true;pickSong();
+  }).catch(function(err){
+    console.warn('[MUSIC] Erro ao buscar playlist:',err.message);
+    playlist=FALLBACK_PLAYLIST;playlistReady=true;pickSong();
+  });
 }
 
-function pickSong() {
-  if (playlist.length === 0) return;
+function pickSong(){
+  if(playlist.length===0)return;
   var idx;
-  if (playlist.length <= 1) { idx = 0; }
-  else { do { idx = Math.floor(Math.random() * playlist.length); } while (idx === lastBgmIdx); }
-  lastBgmIdx = idx;
-  bgm.src = playlist[idx];
+  if(playlist.length<=1){idx=0;}
+  else{do{idx=Math.floor(Math.random()*playlist.length);}while(idx===lastBgmIdx);}
+  lastBgmIdx=idx;bgm.src=playlist[idx];
 }
-
-// Inicia a busca das músicas assim que a página carrega
 fetchPlaylist();
-
-// *** FIM DA ATUALIZAÇÃO ***
 
 var actx=null;
 function initAudio(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();}
@@ -395,6 +403,8 @@ function startGame(){
   visualSnake=snake.map(function(s){return{x:s.x,y:s.y};});
   gameActive=true;lastStep=performance.now();
   document.getElementById('score').textContent='0';updateObstCounter();
+  hideMenuUI();
+  showGameUI();
   requestAnimationFrame(loop);
 }
 
@@ -441,12 +451,12 @@ function draw(ts){
 // ==================== GAME OVER ====================
 function die(){
   gameActive=false;
+  hideGameUI();
   var best=parseInt(localStorage.getItem('cobraBrBest')||'0');
   if(score>best){best=score;localStorage.setItem('cobraBrBest',best);}
   document.getElementById('go-score').textContent=score;
   document.getElementById('go-best').textContent=best;
   document.getElementById('gameover-overlay').classList.add('open');
-  // *** ATUALIZADO: Ao morrer, busca músicas atualizadas e escolhe uma ***
   fetchPlaylist();
 }
 
@@ -454,6 +464,18 @@ document.getElementById('go-restart').addEventListener('click',function(){
   document.getElementById('gameover-overlay').classList.remove('open');
   bgm.play().catch(function(){});
   startGame();
+});
+
+document.getElementById('go-menu').addEventListener('click',function(){
+  document.getElementById('gameover-overlay').classList.remove('open');
+  gameActive=false;
+  bgm.pause();
+  bgm.currentTime=0;
+  showMenuUI();
+  document.getElementById('overlay').style.display='';
+  initMenuSnakes();
+  if(!menuAnimFrame)menuAnimFrame=requestAnimationFrame(animateMenu);
+  document.getElementById('best-score').textContent='Recorde: 👑 '+(localStorage.getItem('cobraBrBest')||'0');
 });
 
 // ==================== INPUT ====================
@@ -487,7 +509,7 @@ document.getElementById('btn-start').addEventListener('click',function(){
   startGame();
 });
 
-document.getElementById('best-score').textContent='Recorde: 👑 '+(localStorage.getItem('cobraBrBest')||"0");
+document.getElementById('best-score').textContent='Recorde: 👑 '+(localStorage.getItem('cobraBrBest')||'0');
 document.getElementById('fullscreen-btn').onclick=function(){
   if(!document.fullscreenElement)document.documentElement.requestFullscreen();
   else document.exitFullscreen();
@@ -495,7 +517,7 @@ document.getElementById('fullscreen-btn').onclick=function(){
 
 // ==================== START ====================
 initMenuSnakes();
-requestAnimationFrame(animateMenu);
+menuAnimFrame=requestAnimationFrame(animateMenu);
 </script>
 </body>
 </html>
